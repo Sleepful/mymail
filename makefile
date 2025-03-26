@@ -38,3 +38,10 @@ live/sync_assets:
 # start all 5 watch processes in parallel.
 live: 
 	make -j5 live/templ live/server live/tailwind live/esbuild live/sync_assets
+
+# Docker
+dockerrun:
+	docker run -p 8090:8090 "imap"
+
+dockerbuild:
+	docker build  . --tag "imap"  --progress=plain --no-cache

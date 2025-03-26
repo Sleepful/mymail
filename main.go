@@ -77,8 +77,10 @@ func main() {
 	muxWithSessionMiddleware := sessionManager.LoadAndSave(mux)
 
 	// Start the server.
-	fmt.Println("listening on http://localhost:8000")
-	if err := http.ListenAndServe("localhost:8000", muxWithSessionMiddleware); err != nil {
+	fmt.Println("listening on http://localhost:8090")
+	// use 0.0.0.0 instead of localhost for docker to resolve properly
+	// https://stackoverflow.com/questions/64666842/docker-run-connection-was-reset-while-the-page-was-loading
+	if err := http.ListenAndServe("0.0.0.0:8090", muxWithSessionMiddleware); err != nil {
 		log.Printf("error listening: %v", err)
 	}
 }
