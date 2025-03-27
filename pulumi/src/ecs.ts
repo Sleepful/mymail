@@ -54,6 +54,21 @@ const service = new awsx.ecs.FargateService("ecs-fargate-mymail", {
     assignPublicIp: true,
   },
   desiredCount: 1,
+  // TODO:
+  // blue green deployments
+  // defaults to "ECS" type:
+  // - default: https://github.com/pulumi/pulumi-aws/blob/master/sdk/dotnet/Ecs/Outputs/ServiceDeploymentController.cs#L17
+  // - green/blue updates: 
+  //    - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-bluegreen.html
+  //    - https://docs.aws.amazon.com/AmazonECS/latest/developerguide/create-blue-green.html
+  // - api: https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_DeploymentController.html
+  // - rolling updates: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html
+  // deploymentController: { type: "CODE_DEPLOY" },
+  //
+  // Alternative with rolling deployment:
+  //
+  // deploymentMaximumPercent: 200,
+  // deploymentMinimumHealthyPercent: 100,
   deploymentMaximumPercent: 100,
   deploymentMinimumHealthyPercent: 0,
   taskDefinitionArgs: {
