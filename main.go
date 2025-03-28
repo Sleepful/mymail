@@ -3,84 +3,83 @@ package main
 import (
 	"fmt"
 	"log"
-	"mymail/app/pages"
 	"net/http"
-	"time"
+	"os"
+	"strings"
 
-	"github.com/alexedwards/scs/v2"
+	"github.com/pocketbase/dbx"
+	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/apis"
+	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+
+	"github.com/joho/godotenv"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
-type GlobalState struct {
-	Count int
-}
-
-var global GlobalState
-var sessionManager *scs.SessionManager
-
-func getHandler(w http.ResponseWriter, r *http.Request) {
-	userCount := sessionManager.GetInt(r.Context(), "count")
-	component := pages.Page(global.Count, userCount)
-	component.Render(r.Context(), w)
-}
-
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	// Update state.
-	r.ParseForm()
-
-	// Check to see if the global button was pressed.
-	if r.Form.Has("global") {
-		global.Count++
+// register the libsql driver to use the same query builder
+// implementation as the already existing sqlite3 builder
+func init() {
+	dbx.BuilderFuncMap["libsql"] = dbx.BuilderFuncMap["sqlite3"]
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
-	if r.Form.Has("user") {
-		currentCount := sessionManager.GetInt(r.Context(), "count")
-		sessionManager.Put(r.Context(), "count", currentCount+1)
-	}
-
-	// Display the form.
-	getHandler(w, r)
-}
-
-var dev = true
-
-func disableCacheInDevMode(next http.Handler) http.Handler {
-	if !dev {
-		return next
-	}
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-store")
-		next.ServeHTTP(w, r)
-	})
 }
 
 func main() {
-	// Initialize the session.
-	sessionManager = scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
+	// DATABASE
+	//
+	app := pocketbase.NewWithConfig(pocketbase.Config{
+		DBConnect: func(dbPath string) (*dbx.DB, error) {
+			// turn off for first-time db creation to avoid turso timeout:
+			// if false {
+			if strings.Contains(dbPath, "data.db") {
+				tursoToken := os.Getenv("TURSO_TOKEN")
+				tursoUrl := os.Getenv("TURSO_URL")
+				urlWithToken := fmt.Sprintf("%s?authToken=%s", tursoUrl, tursoToken)
+				// fmt.Println(urlWithToken)
+				return dbx.Open("libsql", urlWithToken)
+			}
 
-	mux := http.NewServeMux()
-
-	// Handle POST and GET requests.
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			postHandler(w, r)
-			return
-		}
-		getHandler(w, r)
+			// optionally for the logs (aka. pb_data/auxiliary.db) use the default local filesystem driver
+			return core.DefaultDBConnect(dbPath)
+		},
 	})
 
-	mux.Handle("/assets/",
-		disableCacheInDevMode(
-			http.StripPrefix("/assets",
-				http.FileServer(http.Dir("assets")))))
+	// MIGRATIONS
+	//
+	// loosely check if it was executed using "go run"
+	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
 
-	// Add the middleware.
-	muxWithSessionMiddleware := sessionManager.LoadAndSave(mux)
+	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+		// enable auto creation of migration files when making collection changes in the Dashboard
+		// (the isGoRun check is to enable it only during development)
+		Automigrate: isGoRun,
+	})
 
-	// Start the server.
-	fmt.Println("listening on http://localhost:8090")
-	// use 0.0.0.0 instead of localhost for docker to resolve properly
-	// https://stackoverflow.com/questions/64666842/docker-run-connection-was-reset-while-the-page-was-loading
-	if err := http.ListenAndServe("0.0.0.0:8090", muxWithSessionMiddleware); err != nil {
-		log.Printf("error listening: %v", err)
+	// ROUTES
+	//
+	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+		// register "GET /hello/{name}" route (allowed for everyone)
+		se.Router.GET("/hello/{name}", func(e *core.RequestEvent) error {
+			name := e.Request.PathValue("name")
+
+			return e.String(http.StatusOK, "Hello "+name)
+		})
+
+		// register "POST /api/myapp/settings" route (allowed only for authenticated users)
+		se.Router.POST("/api/myapp/settings", func(e *core.RequestEvent) error {
+			// do something ...
+			return e.JSON(http.StatusOK, map[string]bool{"success": true})
+		}).Bind(apis.RequireAuth())
+
+		return se.Next()
+	})
+
+	// RUN
+	//
+	if err := app.Start(); err != nil {
+		log.Fatal(err)
 	}
 }

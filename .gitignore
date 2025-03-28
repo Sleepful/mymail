@@ -1,3 +1,5 @@
 *_templ*
 node_modules/
 
+.env
+pb_data/
