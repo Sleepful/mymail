@@ -1,3 +1,18 @@
+# Dev
+
+Use `make live` to run a server during development with `--watch` capability.
+
+# Testing Dockerfile
+
+Use `dockerbuild` and `dockerrun` to test the Docker image locally.
+
+# Deploy
+
+Deploy with Pulumi:
+
+`cd pulumi && pulumi up`
+
+This will automatically build the Docker image and push it to ECR for the new deployment.
 
 # Making the project prod-ready
 
