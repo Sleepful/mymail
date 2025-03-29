@@ -59,6 +59,9 @@ func MakeRouter(app *pocketbase.PocketBase) {
 				if strings.Contains(fmt.Sprintf("%s", e.Request.URL), "index.js") {
 					e.Response.Header().Set("Content-type", "text/javascript")
 				}
+				if strings.Contains(fmt.Sprintf("%s", e.Request.URL), "styles.css") {
+					e.Response.Header().Set("Content-type", "text/css")
+				}
 				return e.Next()
 			})
 

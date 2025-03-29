@@ -1,1 +1,3 @@
 @import "tailwindcss";
+@plugin "daisyui";
+@source "./pages/*.{html,js,templ}";

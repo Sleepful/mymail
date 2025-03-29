@@ -4,4 +4,5 @@ node_modules/
 .env
 pb_data/
 assets/styles.css
+assets/index.js
 tmp/

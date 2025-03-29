@@ -1,11 +1,11 @@
 package pages
 
 templ Login() {
-	<div>
+	<div class="bg-red-100">
 		<form action="/api/collections/users/auth-with-password" method="POST">
 			<input type="text" name="identity" placeholder="Username" required/>
 			<input type="password" name="password" placeholder="Password" required/>
-			<button type="submit">Login</button>
+			<button class="btn" type="submit">Login</button>
 		</form>
 	</div>
 }
