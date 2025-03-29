@@ -2,18 +2,16 @@ package main
 
 import (
 	// "bytes"
-	"mymail/app/pages"
+	"mymail/app"
 
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
 	// "github.com/a-h/templ"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
-	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 
@@ -34,7 +32,7 @@ func init() {
 func main() {
 	// DATABASE
 	//
-	app := pocketbase.NewWithConfig(pocketbase.Config{
+	pbInstance := pocketbase.NewWithConfig(pocketbase.Config{
 		DBConnect: func(dbPath string) (*dbx.DB, error) {
 			// turn off for first-time db creation to avoid turso timeout:
 			// if false {
@@ -53,60 +51,14 @@ func main() {
 
 	// ROUTES
 	//
-	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-
-		se.Router.BindFunc(apis.WrapStdMiddleware(func(h http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				h.ServeHTTP(w, r)
-			})
-		}))
-		// g := se.Router.Group("/page")
-		// attach group middleware
-		se.Router.BindFunc(func(e *core.RequestEvent) error {
-			e.Next()
-			return e.Next()
-		})
-
-		se.Router.GET("/page/{name}", apis.WrapStdHandler(
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				// wraps component in layout
-				pages.Layout(pages.Login()).Render(r.Context(), w)
-			})))
-
-		// register "GET /hello/{name}" route (allowed for everyone)
-		se.Router.GET("/hello/{name}", func(e *core.RequestEvent) error {
-			name := e.Request.PathValue("name")
-
-			return e.String(http.StatusOK, "Hello "+name)
-		})
-
-		se.Router.GET("/page/login", func(e *core.RequestEvent) error {
-			r := e.Request
-			w := e.Response
-			pages.Login().Render(r.Context(), w)
-			// w := new(bytes.Buffer)
-			// pages.Login().Render(r.Context(), w)
-			// s := w.String()
-
-			println(2)
-			return e.HTML(http.StatusOK, "")
-		})
-
-		// register "POST /api/myapp/settings" route (allowed only for authenticated users)
-		se.Router.POST("/api/myapp/settings", func(e *core.RequestEvent) error {
-			// do something ...
-			return e.JSON(http.StatusOK, map[string]bool{"success": true})
-		}).Bind(apis.RequireAuth())
-
-		return se.Next()
-	})
+	app.MakeRouter(pbInstance)
 
 	// MIGRATIONS
 	//
 	// loosely check if it was executed using "go run"
 	isGoRun := strings.HasPrefix(os.Args[0], os.TempDir())
 
-	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+	migratecmd.MustRegister(pbInstance, pbInstance.RootCmd, migratecmd.Config{
 		// enable auto creation of migration files when making collection changes in the Dashboard
 		// (the isGoRun check is to enable it only during development)
 		Automigrate: isGoRun,
@@ -114,7 +66,7 @@ func main() {
 
 	// RUN
 	//
-	if err := app.Start(); err != nil {
+	if err := pbInstance.Start(); err != nil {
 		log.Fatal(err)
 	}
 }

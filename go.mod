@@ -9,6 +9,7 @@ require (
 	github.com/pocketbase/dbx v1.11.0
 	github.com/pocketbase/pocketbase v0.26.4
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
+	github.com/urfave/negroni v1.0.0
 )
 
 require (
