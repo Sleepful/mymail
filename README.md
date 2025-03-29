@@ -16,11 +16,16 @@ This will automatically build the Docker image and push it to ECR for the new de
 
 # Making the project prod-ready
 
-Create separate `dev` and `prod` environments.
+These are some aspects to take into account if this project were to be deployed in a prod environment.
+
+- Create separate `dev` and `prod` environments.
 Right now the same Turso database is accessed in any env, 
 a better configuration would use a local database for `dev`.
 To do so it would be necessary to add a CI/CD pipeline to handle 
 the migrations on the `prod` database.
+- Add CSRF protection to the forms, given that the project is using cookie-based authentication.
+
+
 
 
 # todo
