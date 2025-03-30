@@ -162,8 +162,12 @@ func MakeRouter(app *pocketbase.PocketBase) {
 				pages.Inbox().Render(r.Context(), w)
 			})))
 
-		// CATCH-ALL
+		// Redirect to /login
 		se.Router.GET("/", func(e *core.RequestEvent) (err error) {
+			return e.Redirect(303, "/login")
+		})
+		// CATCH-ALL
+		se.Router.Any("/", func(e *core.RequestEvent) (err error) {
 			return e.String(http.StatusNotFound, "This page does not exist, please go back... TODO: make friendly 404 page")
 		})
 
