@@ -1,5 +1,6 @@
 # Dev
 
+First, create and env file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
 Use `make live` to run a server during development with `--watch` capability.
 
 # Testing Dockerfile
@@ -31,6 +32,11 @@ To do so it would be necessary to add a CI/CD pipeline to handle
 the migrations on the `prod` database.
 - Add CSRF protection to the forms, given that the project is using cookie-based authentication.
 
+# Additional improvements for a long-term project
+
+- Moving away from Fargate and implementing a CI/CD pipeline.
+    * Fargate is useful for its simplicity as there is no need to manage Linux resources as there would be with EC2 or Kubernetes.
+    * However, Fargate has a very slow deployment process, it may take up to 20 minutes to look at a live 
 
 
 
@@ -39,22 +45,114 @@ the migrations on the `prod` database.
 - excalidraw of system
 - excalidraw of deployment
 
-- make subgroups middleware work
-- make auth work (trigger webapi without http call?)
+Saturday
+<!-- - add adhoc auth: use password-with-auth enpoint on form submission, add a hook this route in order to store the token in cookie (view Templ example), then add a "everything middleware" that reads this cookie and appends it to the auth header of all requests that have the cookie. -->
+<!--     * test that it works -->
+<!--         + https://pocketbase.io/docs/api-records/#auth-with-password -->
+<!-- - add the "Bind(apis.RequireAuth())" method to the custom routes that require auth -->
+<!--     * test that it works -->
+<!--         + https://pocketbase.io/docs/go-routing/#registering-new-routes -->
+<!-- - later, add logout endpoint that just deletes the cookie -->
+<!--     * test that it works -->
 
-- add adhoc auth: use password-with-auth enpoint on form submission, add a hook this route in order to store the token in cookie (view Templ example), then add a "everything middleware" that reads this cookie and appends it to the auth header of all requests that have the cookie.
-    * test that it works
-        + https://pocketbase.io/docs/api-records/#auth-with-password
-- add the "Bind(apis.RequireAuth())" method to the custom routes that require auth
-    * test that it works
-        + https://pocketbase.io/docs/go-routing/#registering-new-routes
-- later, add logout endpoint that just deletes the cookie
-    * test that it works
-
+Sunday
+<!-- - test pulumi deployment of progress so far -->
 - start Postmark api integration once auth is working
     * https://postmarkapp.com/developer/integration/community-libraries#google-go
 
+# Tech Stack
+
+TODO: Add justification for these choices
+
+## Infrastructure
+
+- AWS 
+    * Cloud provider.
+- Docker
+    * Containerization.
+- [ Pulumi ]()
+    * This is an IaC solution that can be configured from a variety of programming languages through an SDK.
+    * Provides the capacity to use a familiar programming language to configure the AWS services, this allows easy iteration and powerful contructs within the configuration.
+    * Controls the provisioning of the AWS resources from scratch, including: VPC (Subnets & Security Groups), ECS, Fargate.
+- [ ECS ]()
+    * AWS service to orchestrate containers.
+    * The parent service to deploy Fargate instances.
+    * Allows tight control over the network configuration through AWS VPC, such as:
+        + The Subnet assignment to the resources.
+        + The Security Groups assigned to the resources.
+        + The routing tables within the VPC for its managed resources.
+    * Manages a variety of services beyond the Fargate instance, such as:
+        + The Internet Gateway to receive internet traffic.
+        + The Load Balancer, to route internet traffic to the Fargate instances.
+        + In case of private subnets, it manages the NAT Gateway.
+        + In case of public subnets, the public IPs (Elastic IPs) for outbound traffic.
+- [ Fargate ]()
+    * The compute managed by ECS, Fargate is the "managed" version. ECS can also run on self-managed EC2. Fargate abstracts away the maintanance of the EC2 instances.
+    * Allow easy deployment of managed Docker containers.
+    * For an app that needs to run 24/7, the price point is slightly higher than equivalent EC2 instances, but not by much.
+- [ Turso ]()
+    * This SaaS offers a remote managed SQLite database for a great price. Similar to using RDS, but simpler.
+    * Works like a charm with the chosen backend framework chosen for the app, as both are limited to the SQLite database.
+- [ Postmark ]()
+    * This SaaS offers inbound and outbound email delivery through a JSON API, this significantly simplifies email integration in comparison to common email protocols.
+- Go programming language
+    * The server app is written with Go.
+
+## Reliability and Durability
+
+### Server Reliability
+
+Due to the usage of ECS, the reliability of the app ought to be fairly high, as ECS manages the recreation of the server on a different Availability Zone if the current Availability Zone goes down. The main issue is going to be the downtime that it takes for ECS to redeploy the task. In my experience, this downtime is anywhere between 10 and 30 minutes.
+
+Additionally, a High Availability scheme for the server is not straight-forward to implement as it is and would require additional work. Specifically because the user sessions are stored on the server's memory, so it would be necessary to store the sessions on a durable persistance layer (such as the DB or distributed KV stores) to allow the horizontal scaling of the server across Availability Zones.
+
+### Data Durability
+
+Due to the usage of Turso SaaS for data, the data durability is incredibly high for any single write. All writes to the DB must be persisted to the Turso leader database before they are considered committed on the go server. As a fail-safe measure, periodic database backups may be performed.
+
+## Server app
+
+- Go libraries that power the app:
+    * [ Pocketbase ]()
+        + Framework to quickly iterate over the backend, managing many topics out of the box, such as:
+            + Manages the database schema.
+            + Manages a variety of operations on the database to consume the data.
+            + Manages authentication for users and JWT tokens.
+            + Manages authorization roles for each user, allowing them to access only their own data.
+    * [ Templ ]()
+        + HTML templating for Go apps. Like JSX but for Go.
+    * [ SCS ](): Go session manager
+        + TODO: explain cookies auth here
+- Frontend libraries:
+    * [ HTMX ]()
+        + TODO: 
+    * [ DaisyUi ]()
+        + TODO: 
+
+# Feature set
+
+## Priorities when picking the feature-set of the solution
+
+- Full implementation across the tech stack, including proper configuration of the cloud resources.
+- Proper user authentication.
+- Ease of use.
+- Meets the requirements of receiving and sending email with an intuitive user experience.
+- A balance to make an efficient use of time without cutting corners that ought to be considered cornerstones of online software.
+    * Careful decisions when choosing the external dependencies to meet this balance:
+        + Simplicity over complexity.
+        + Efficient external tools where a hand-written solution provides little benefit.
+        + Flexibility and freedom over smothering software dependencies.
+
+
+TODO:
+The features showcased include...
+I picked these because....
+
 # Some learnings
+
+## Things that went well 
+
+## Things that I would have done differently a second time
 
 Using Pocketbase with a go-based ServerSideRendering for the UI is not ideal, as the Pocketbase API is focused on a JavaScript SDK, and misses some of its user functionality when using it as a server framework. For example:
 - there is no clear way to handle user auth from the Go code. 
