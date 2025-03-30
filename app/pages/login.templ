@@ -1,11 +1,28 @@
 package pages
 
 templ Login() {
-	<div class="bg-red-100">
-		<form action="/api/collections/users/auth-with-password" method="POST">
-			<input type="text" name="identity" placeholder="Username" required/>
-			<input type="password" name="password" placeholder="Password" required/>
-			<button class="btn" type="submit">Login</button>
-		</form>
-	</div>
+	@Layout() {
+		<div class="h-screen flex bg-base-300">
+			<div class="m-auto card w-96 bg-base-100 shadow-sm">
+				<div class="card-body">
+					<form
+						class="space-y-2"
+						hx-post="/api/collections/users/auth-with-password"
+						hx-target="#response-div"
+						hx-indicator="#spinner"
+						x-action="/api/collections/users/auth-with-password"
+						method="POST"
+					>
+						<input class="input" type="text" name="identity" placeholder="Username" required/>
+						<input class="input" type="password" name="password" placeholder="Password" required/>
+						<div class="flex flex-row justify-between">
+							<button class="btn btn-primary" type="submit">Login</button>
+							<img id="spinner" class="htmx-indicator filter-blue h-12" src="assets/spinner.svg"/>
+						</div>
+					</form>
+					<div id="response-div"></div>
+				</div>
+			</div>
+		</div>
+	}
 }

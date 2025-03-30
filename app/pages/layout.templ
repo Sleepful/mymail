@@ -1,17 +1,17 @@
 package pages
 
-templ Layout(inner templ.Component) {
+templ Layout() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<title>MyEmail</title>
-			<script src="assets/index.js" defer></script>
-			<link rel="stylesheet" href="assets/styles.css"/>
+			<script src="/assets/index.js" defer></script>
+			<link rel="stylesheet" href="/assets/styles.css"/>
 		</head>
 		<body>
 			<div id="wrapper">
-				@inner
+				{ children... }
 			</div>
 		</body>
 	</html>

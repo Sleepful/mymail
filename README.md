@@ -8,11 +8,17 @@ Use `make dockerbuild` and `make dockerrun` to test the Docker image locally.
 
 # Deploy
 
+First make sure all the assets have been generated in your local machine (Docker will copy them):
+
+`make live` in the root of the project
+
 Deploy with Pulumi:
 
 `cd pulumi && pulumi up`
 
 This will automatically build the Docker image and push it to ECR for the new deployment.
+
+You need to configure your aws cli credentials so Pulumi may pull them.
 
 # Making the project prod-ready
 

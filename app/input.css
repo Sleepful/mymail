@@ -1,3 +1,10 @@
 @import "tailwindcss";
-@plugin "daisyui";
 @source "./pages/*.{html,js,templ}";
+@plugin "daisyui" {
+   /* themes: light --default, dark --prefersdark; */
+   themes: light --default
+
+ }
+.filter-blue{
+  filter: invert(46%) sepia(56%) saturate(3856%) hue-rotate(165deg) brightness(100%) contrast(101%);
+}

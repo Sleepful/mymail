@@ -13,7 +13,7 @@ live/templ:
 # run air to detect any go file changes to re-build and re-run the server.
 live/server:
 	go run github.com/cosmtrek/air@v1.51.0 \
-	--build.cmd "go build -o tmp/bin/main" --build.bin "tmp/bin/main serve" --build.delay "100" \
+	--build.cmd "go build -o tmp/bin/main && sleep 4 && tput bel" --build.bin "tmp/bin/main serve" --build.delay "100" \
 	--build.exclude_dir "pulumi,node_modules" \
 	--build.include_ext "go" \
 	--build.stop_on_error "false" \
