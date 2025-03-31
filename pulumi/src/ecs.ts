@@ -36,6 +36,9 @@ const lb = new awsx.lb.ApplicationLoadBalancer("lb-mymail", {
   ],
   defaultTargetGroup: {
     port: 8090,
+    healthCheck: {
+      path: "/login",
+    }
   },
   securityGroups: [sgAllowTls.id, sgAllowHttp.id],
   subnetIds: publicSubnetIds,
