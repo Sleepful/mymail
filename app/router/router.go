@@ -1,8 +1,7 @@
-package app
+package router
 
 import (
 	"fmt"
-	"io"
 	"mymail/app/pages"
 	"mymail/app/partials"
 	"net/http"
@@ -57,6 +56,13 @@ func loadAuthTokenFromCookie() *hook.Handler[*core.RequestEvent] {
 
 			token := sessionManager.GetString(e.Request.Context(), authCookieKey)
 
+			// [ token debug ]
+			// for dev iteration:
+			// Do NOT use with PocketBase admin dashboard
+			if true {
+				// println(token)
+				token = ""
+			}
 			if token == "" {
 				return e.Next()
 			}
@@ -106,7 +112,7 @@ func cookieMiddleware() *hook.Handler[*core.RequestEvent] {
 	}
 }
 
-func MakeRouter(app *pocketbase.PocketBase) {
+func MakeRouter(pb *pocketbase.PocketBase) {
 	// INIT SERVER CLIENTS
 	// cookies session manager
 	sessionManager = scs.New()
@@ -115,7 +121,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 	// postmarkClient := postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 	postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 
-	app.OnRecordAuthRequest("users").BindFunc(func(e *core.RecordAuthRequestEvent) error {
+	pb.OnRecordAuthRequest("users").BindFunc(func(e *core.RecordAuthRequestEvent) error {
 		// println("OnRecordAuthRequest")
 		// to set cookie value
 		sessionManager.Put(e.Request.Context(), authCookieKey, e.Token)
@@ -125,7 +131,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 		return e.NoContent(http.StatusOK)
 	})
 
-	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
+	pb.OnServe().BindFunc(func(se *core.ServeEvent) error {
 
 		se.Router.BindFunc(rootMiddleware)
 		se.Router.Bind(cookieMiddleware())
@@ -142,7 +148,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 				// 	return err
 				// }
 				// fmt.Println(buf.String())
-				collection, err := app.FindCollectionByNameOrId("inbound")
+				collection, err := pb.FindCollectionByNameOrId("inbound")
 				if err != nil {
 					return err
 				}
@@ -163,7 +169,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 				record.Set("raw", info.Body)
 
 				// validate and persist
-				err = app.Save(record)
+				err = pb.Save(record)
 				if err != nil {
 					return err
 				}
@@ -201,13 +207,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 				return e.NoContent(http.StatusOK)
 			})
 
-		pageGroup := se.Router.Group("/page")
-		pageGroup.BindFunc(requireAuth) // require auth for /page* routes
-
-		pageGroup.GET("/inbox", apis.WrapStdHandler(
-			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				pages.Inbox().Render(r.Context(), w)
-			})))
+		MakePageGroup(pb, se)
 
 		// Redirect to /login
 		se.Router.GET("/", func(e *core.RequestEvent) (err error) {

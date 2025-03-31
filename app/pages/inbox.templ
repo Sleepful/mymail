@@ -1,55 +1,87 @@
 package pages
 
-templ listInbox() {
-	<ul class="list bg-base-100 rounded-box shadow-md">
-		<li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Most played songs this week</li>
-		<li class="list-row">
-			<div><img class="size-10 rounded-box" src="https://img.daisyui.com/images/profile/demo/1@94.webp"/></div>
-			<div>
-				<div>Dio Lupa</div>
-				<div class="text-xs uppercase font-semibold opacity-60">Remaining Reason</div>
-			</div>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M6 3L20 12 6 21 6 3z"></path></g></svg>
-			</button>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></g></svg>
-			</button>
-		</li>
-		<li class="list-row">
-			<div><img class="size-10 rounded-box" src="https://img.daisyui.com/images/profile/demo/4@94.webp"/></div>
-			<div>
-				<div>Ellie Beilish</div>
-				<div class="text-xs uppercase font-semibold opacity-60">Bears of a fever</div>
-			</div>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M6 3L20 12 6 21 6 3z"></path></g></svg>
-			</button>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></g></svg>
-			</button>
-		</li>
-		<li class="list-row">
-			<div><img class="size-10 rounded-box" src="https://img.daisyui.com/images/profile/demo/3@94.webp"/></div>
-			<div>
-				<div>Sabrino Gardener</div>
-				<div class="text-xs uppercase font-semibold opacity-60">Cappuccino</div>
-			</div>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M6 3L20 12 6 21 6 3z"></path></g></svg>
-			</button>
-			<button class="btn btn-square btn-ghost">
-				<svg class="size-[1.2em]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></g></svg>
-			</button>
-		</li>
+import "mymail/app/shared"
+import "fmt"
+
+templ envelopeIcon() {
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+		<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"></path>
+	</svg>
+}
+
+templ deleteIcon() {
+	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+		<path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
+	</svg>
+}
+
+templ email(d shared.EmailData) {
+	{{	timeType := d.Date.Time()
+	dateStr := timeType.Format("3:04 pm - Monday, January 01")
+	}}
+	<li id={ fmt.Sprintf("row_%s", d.Id) }>
+		<ul>
+			<div class="ml-4 divider divider-start">{ dateStr }</div>
+			<li class="list-row">
+				<div>
+					@envelopeIcon()
+				</div>
+				<div>
+					<div class="font-semibold">{ d.Subject }</div>
+					<ul class="list-disc ml-4">
+						<li>
+							<div class="text-xs uppercase font-semibold opacity-60">FROM: { d.From }</div>
+						</li>
+						<li>
+							<div class="text-xs uppercase font-semibold opacity-60">TO: { d.To }</div>
+						</li>
+					</ul>
+				</div>
+				<p class="list-col-wrap text-xs">
+					{ d.Body }
+				</p>
+				<button
+					class="btn btn-square btn-ghost"
+					hx-target={ fmt.Sprintf("#row_%s", d.Id) }
+					hx-ext="debug"
+					hx-swap="delete"
+					hx-delete={ fmt.Sprintf("/page/inbox/delete/%s", d.Id) }
+				>
+					@deleteIcon()
+				</button>
+			</li>
+		</ul>
+	</li>
+}
+
+// {{ items := nil }}
+// {{ items := ctx.Value("emailList").([]EmailData) }}
+templ ListInbox() {
+	{{ items := shared.GetEmailList(ctx) }}
+	<ul id="list-inbox" class="list bg-base-100 rounded-box shadow-md m-12">
+		<li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Your inbox:</li>
+		if items == nil {
+			<div>Empty inbox :)</div>
+		} else {
+			for _, item := range items {
+				<li>
+					@email(item)
+				</li>
+			}
+		}
 	</ul>
 }
 
-templ topBar() {
-	<div class="navbar bg-base-100 shadow-sm">
-		<a class="btn btn-ghost text-xl">MyMail</a>
-		<button class="btn btn-primary" type="submit">Write Email</button>
-		<button hx-post="/logout" class="btn btn-secondary" type="submit">Logout</button>
+templ topBar(userEmail string) {
+	<div class="navbar bg-base-300 border-sky-500 border-b-2 border-dashed shadow-sm flex justify-around">
+		<a class="btn btn-ghost text-xl">{ userEmail }</a>
+		<button
+			hx-get="/page/new"
+			hx-target="#layout_wrapper"
+			class="btn btn-primary btn-soft btn-wide border-primary border-2"
+			type="submit"
+		>Write Email</button>
+		<button hx-post="/logout" class="btn btn-soft border-neutral border-2" type="submit">Logout</button>
 	</div>
 }
 
@@ -57,10 +89,18 @@ templ previewPlaceholder() {
 	<button class="btn btn-primary" type="submit">Preview</button>
 }
 
-templ Inbox() {
-	@Layout() {
-		@topBar()
-		@listInbox()
-		@previewPlaceholder()
+templ Inbox(userEmail string, layout bool) {
+	if layout {
+		@Layout() {
+			<div>
+				@topBar(userEmail)
+				@ListInbox()
+			</div>
+		}
+	} else {
+		<div>
+			@topBar(userEmail)
+			@ListInbox()
+		</div>
 	}
 }

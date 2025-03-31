@@ -2,7 +2,6 @@ package main
 
 import (
 	// "bytes"
-	"mymail/app"
 
 	"fmt"
 	"log"
@@ -17,6 +16,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	"mymail/app/router"
 )
 
 // register the libsql driver to use the same query builder
@@ -51,7 +51,7 @@ func main() {
 
 	// ROUTES
 	//
-	app.MakeRouter(pbInstance)
+	router.MakeRouter(pbInstance)
 
 	// MIGRATIONS
 	//

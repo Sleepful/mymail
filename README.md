@@ -73,9 +73,9 @@ Sunday
 <!--     * https://postmarkapp.com/developer/integration/community-libraries#google-go -->
 <!-- - Store inbound emails in Pocketbase -->
 <!--     * separate by user -->
-- Add UI to look at inbound emails
-    * button to delete
-    * only own user sees own emails
+<!-- - Add UI to look at inbound emails -->
+<!--     * button to delete -->
+<!--     * only own user sees own emails -->
 - Add UI to create new emails
     * test UI submit emails, verify Postmark delivery succeeds
     * only own user sees own emails
@@ -186,6 +186,7 @@ Due to simple parsing logic for inbound emails:
     * To
     * From
     * Body in plain text
+    * Date (which is not timezone-localized)
 
 With additional time, these limitations would be amended with ease.
 
