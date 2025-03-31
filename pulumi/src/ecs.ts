@@ -66,11 +66,10 @@ const service = new awsx.ecs.FargateService("ecs-fargate-mymail", {
   // deploymentController: { type: "CODE_DEPLOY" },
   //
   // Alternative with rolling deployment:
-  //
-  // deploymentMaximumPercent: 200,
-  // deploymentMinimumHealthyPercent: 100,
-  deploymentMaximumPercent: 100,
-  deploymentMinimumHealthyPercent: 0,
+  deploymentMaximumPercent: 200,
+  deploymentMinimumHealthyPercent: 100,
+  // deploymentMaximumPercent: 100,
+  // deploymentMinimumHealthyPercent: 0,
   taskDefinitionArgs: {
     container: {
       name: "myPocketbaseService",

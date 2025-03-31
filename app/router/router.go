@@ -59,7 +59,7 @@ func loadAuthTokenFromCookie() *hook.Handler[*core.RequestEvent] {
 			// [ token debug ]
 			// for dev iteration:
 			// Do NOT use with PocketBase admin dashboard
-			if true {
+			if false {
 				// println(token)
 				token = ""
 			}
@@ -117,9 +117,7 @@ func MakeRouter(pb *pocketbase.PocketBase) {
 	// cookies session manager
 	sessionManager = scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
-	// api routes
-	// postmarkClient := postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
-	postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
+	postmarkClient = postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 
 	pb.OnRecordAuthRequest("users").BindFunc(func(e *core.RecordAuthRequestEvent) error {
 		// println("OnRecordAuthRequest")

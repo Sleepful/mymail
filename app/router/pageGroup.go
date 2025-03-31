@@ -6,6 +6,7 @@ import (
 	"mymail/app/shared"
 	"net/http"
 
+	"github.com/mrz1836/postmark"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
@@ -59,14 +60,84 @@ func MakePageGroup(pb *pocketbase.PocketBase, se *core.ServeEvent) {
 				record, err := pb.FindRecordById("inbound", id)
 				if err != nil {
 					http.Error(w, "", http.StatusBadRequest)
+					e.App.Logger().Error("record not found on delete:", "error", err)
 					return
 				}
-				if record.GetString("from") != e.Auth.GetString("email") {
+				if record.GetString("to") != e.Auth.GetString("email") {
 					http.Error(w, "", http.StatusBadRequest)
+					e.App.Logger().Error("delete failed", "email", e.Auth.GetString("email"), "from", record.GetString("from"))
 					return
 				}
 				record.Set("deleted", true)
 				err = pb.Save(record)
+				if err != nil {
+					http.Error(w, "", http.StatusBadRequest)
+					e.App.Logger().Error("could not delete:", "error", err)
+					return
+				}
+			}).ServeHTTP(e.Response, e.Request)
+			return nil
+		})
+
+	pageGroup.POST("/new/submit",
+		func(e *core.RequestEvent) error {
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// println("/new/submit")
+				collection, err := pb.FindCollectionByNameOrId("outbound")
+				if err != nil {
+					pages.Submitted("There was an error :(").Render(r.Context(), w)
+					return
+				}
+				info, err := e.RequestInfo()
+				if err != nil {
+					e.App.Logger().Error("Failed RequestInfo")
+					pages.Submitted("There was an error :(").Render(r.Context(), w)
+
+				}
+				to, ok := info.Body["to"].(string)
+				subject, okk := info.Body["subject"].(string)
+				body, okkk := info.Body["body"].(string)
+				if !(ok && okk && okkk) {
+					e.App.Logger().Error("Failed user input")
+					pages.Submitted("There was an error :(").Render(r.Context(), w)
+					return
+				}
+
+				record := core.NewRecord(collection)
+				record.Set("to", to)
+				record.Set("from", e.Auth.GetString("email"))
+				record.Set("body", body)
+				record.Set("subject", subject)
+
+				error := pb.Validate(record)
+				if error != nil {
+					e.App.Logger().Error("Failed pbValidate")
+					e.App.Logger().Error("pbValidate:", "error", error)
+					pages.Submitted("There was an error :(").Render(r.Context(), w)
+
+				}
+
+				email := postmark.Email{
+					From:     e.Auth.GetString("email"),
+					To:       to,
+					Subject:  subject,
+					TextBody: body,
+					Tag:      "outbound",
+				}
+
+				_, errApi := postmarkClient.SendEmail(context.Background(), email)
+				if errApi != nil {
+					e.App.Logger().Error("errApi:", "error", errApi)
+					e.App.Logger().Error("errApi:", "error", errApi)
+					e.App.Logger().Error("errApi:", "error", errApi)
+
+					pages.Submitted("There was an error :(").Render(r.Context(), w)
+
+					return
+				}
+				pb.Save(record)
+				pages.Submitted("Your email has been sent!").Render(r.Context(), w)
+
 			}).ServeHTTP(e.Response, e.Request)
 			return nil
 		})
@@ -74,21 +145,9 @@ func MakePageGroup(pb *pocketbase.PocketBase, se *core.ServeEvent) {
 	pageGroup.GET("/new",
 		func(e *core.RequestEvent) error {
 			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				// Create a context variable that inherits from a parent, and sets the value "test".
-				// Create a context key for the theme.
 				pages.New(e.Auth.GetString("email")).Render(r.Context(), w)
 			}).ServeHTTP(e.Response, e.Request)
 			return nil
 		})
 
 }
-
-// func(e *core.RequestEvent) error {
-// 	http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 		// if record.GetString("from") != e.Auth.GetString("email") {
-// 		// 	http.Error(w, "", http.StatusBadRequest)
-// 		// 	return
-// 		// }
-// 	}).ServeHTTP(e.Response, e.Request)
-// 	return nil
-// })

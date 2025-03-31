@@ -13,9 +13,57 @@ templ topBarNew(userEmail string) {
 	</div>
 }
 
+templ Submitted(msg string) {
+	<div
+		class="flex"
+	>
+		<div class="m-auto card w-96 bg-base-100 shadow-sm my-4">
+			<div class="card-body">
+				<form
+					class="space-y-4 flex flex-col items-center"
+				>
+					<div role="alert" class="alert alert-vertical sm:alert-horizontal">
+						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info h-6 w-6 shrink-0">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						<span>{ msg }</span>
+					</div>
+					<button
+						hx-get="/page/new"
+						hx-target="#layout_wrapper"
+						class="btn btn-primary btn-soft btn-wide border-primary border-2 m-auto"
+						type="submit"
+					>Write another email</button>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+
+templ EmailForm() {
+	<form
+		id="email_form"
+		class=""
+		hx-target="#email_form"
+		hx-post="/page/new/submit"
+		hx-swap="outerHTML"
+	>
+		<fieldset class="m-auto flex flex-col content-center w-sm fieldset bg-base-200 border border-base-300 p-4 rounded-box">
+			<legend class="fieldset-legend">New email</legend>
+			<label class="fieldset-label">To:</label>
+			<input name="to" type="email" class="input" required placeholder="Recepient's email"/>
+			<label class="fieldset-label">Subject:</label>
+			<input name="subject" class="input" required placeholder="I am thinking about..."/>
+			<label class="fieldset-label">Message:</label>
+			<textarea name="body" class="textarea" id="message" name="message" required></textarea>
+			<button type="submit" class="btn btn-neutral mt-4">Send Email</button>
+		</fieldset>
+	</form>
+}
+
 templ New(userEmail string) {
 	<div>
 		@topBarNew(userEmail)
-		@previewPlaceholder()
+		@EmailForm()
 	</div>
 }

@@ -7,11 +7,11 @@ templ Login() {
 				<div class="card-body">
 					<form
 						class="space-y-2"
+						method="POST"
 						hx-post="/api/collections/users/auth-with-password"
+						action="/api/collections/users/auth-with-password"
 						hx-target="#response-div"
 						hx-indicator="#spinner"
-						x-action="/api/collections/users/auth-with-password"
-						method="POST"
 					>
 						<input class="input" type="text" name="identity" placeholder="Username" required/>
 						<input class="input" type="password" name="password" placeholder="Password" required/>

@@ -85,10 +85,6 @@ templ topBar(userEmail string) {
 	</div>
 }
 
-templ previewPlaceholder() {
-	<button class="btn btn-primary" type="submit">Preview</button>
-}
-
 templ Inbox(userEmail string, layout bool) {
 	if layout {
 		@Layout() {

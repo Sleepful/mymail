@@ -76,10 +76,10 @@ Sunday
 <!-- - Add UI to look at inbound emails -->
 <!--     * button to delete -->
 <!--     * only own user sees own emails -->
-- Add UI to create new emails
-    * test UI submit emails, verify Postmark delivery succeeds
-    * only own user sees own emails
-    * Store outbound emails in Pocketbase
+<!-- - Add UI to create new emails -->
+<!--     * test UI submit emails, verify Postmark delivery succeeds -->
+<!--     * only own user sees own emails -->
+<!--     * Store outbound emails in Pocketbase -->
     * add UI to look at outbound emails
         + (same as before):
             + button to delete
