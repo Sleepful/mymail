@@ -6,6 +6,7 @@ require (
 	github.com/a-h/templ v0.3.833
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/joho/godotenv v1.5.1
+	github.com/mrz1836/postmark v1.7.1
 	github.com/pocketbase/dbx v1.11.0
 	github.com/pocketbase/pocketbase v0.26.4
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d

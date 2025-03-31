@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"io"
 	"mymail/app/pages"
 	"mymail/app/partials"
 	"net/http"
@@ -16,10 +17,13 @@ import (
 	"github.com/pocketbase/pocketbase/tools/hook"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/mrz1836/postmark"
 	"github.com/urfave/negroni"
 )
 
 var sessionManager *scs.SessionManager
+
+var postmarkClient *postmark.Client
 
 const authCookieKey = "auth"
 
@@ -103,9 +107,13 @@ func cookieMiddleware() *hook.Handler[*core.RequestEvent] {
 }
 
 func MakeRouter(app *pocketbase.PocketBase) {
+	// INIT SERVER CLIENTS
 	// cookies session manager
 	sessionManager = scs.New()
 	sessionManager.Lifetime = 24 * time.Hour
+	// api routes
+	// postmarkClient := postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
+	postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 
 	app.OnRecordAuthRequest().BindFunc(func(e *core.RecordAuthRequestEvent) error {
 		// println("OnRecordAuthRequest")
@@ -122,6 +130,20 @@ func MakeRouter(app *pocketbase.PocketBase) {
 		se.Router.BindFunc(rootMiddleware)
 		se.Router.Bind(cookieMiddleware())
 		se.Router.Bind(loadAuthTokenFromCookie())
+
+		// Email inbound from postmark
+		se.Router.POST("/api/postmark/inbound",
+			func(e *core.RequestEvent) error {
+				// postmarkClient
+				buf := new(strings.Builder)
+				_, err := io.Copy(buf, e.Request.Body)
+				if err != nil {
+					return err
+				}
+				// check errors
+				fmt.Println(buf.String())
+				return e.NoContent(http.StatusOK)
+			})
 
 		// serve static assets
 		se.Router.GET("/assets/{path...}", apis.Static(os.DirFS("assets"), false)).BindFunc(
