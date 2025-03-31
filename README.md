@@ -28,7 +28,7 @@ Deploy with Pulumi:
 
 This will automatically build the Docker image and push it to ECR for the new deployment.
 
-You need to configure your aws cli credentials so Pulumi may pull them.
+You need to configure your aws cli credentials for Pulumi to authenticate with your AWS account.
 
 # Making the project prod-ready
 
@@ -50,45 +50,7 @@ the migrations on the `prod` database.
     * Fargate is useful for its simplicity as there is no need to manage Linux resources as there would be with EC2 or Kubernetes.
     * However, Fargate has a very slow deployment process, it may take up to 20 minutes to look at a live 
 
-
-
-# todo
-
-- excalidraw of system
-- excalidraw of deployment
-
-Saturday
-<!-- - add adhoc auth: use password-with-auth enpoint on form submission, add a hook this route in order to store the token in cookie (view Templ example), then add a "everything middleware" that reads this cookie and appends it to the auth header of all requests that have the cookie. -->
-<!--     * test that it works -->
-<!--         + https://pocketbase.io/docs/api-records/#auth-with-password -->
-<!-- - add the "Bind(apis.RequireAuth())" method to the custom routes that require auth -->
-<!--     * test that it works -->
-<!--         + https://pocketbase.io/docs/go-routing/#registering-new-routes -->
-<!-- - later, add logout endpoint that just deletes the cookie -->
-<!--     * test that it works -->
-
-Sunday
-<!-- - test pulumi deployment of progress so far -->
-<!-- - start Postmark api integration once auth is working -->
-<!--     * https://postmarkapp.com/developer/integration/community-libraries#google-go -->
-<!-- - Store inbound emails in Pocketbase -->
-<!--     * separate by user -->
-<!-- - Add UI to look at inbound emails -->
-<!--     * button to delete -->
-<!--     * only own user sees own emails -->
-<!-- - Add UI to create new emails -->
-<!--     * test UI submit emails, verify Postmark delivery succeeds -->
-<!--     * only own user sees own emails -->
-<!--     * Store outbound emails in Pocketbase -->
-    * add UI to look at outbound emails
-        + (same as before):
-            + button to delete
-            + only own user sees own emails
-- update Postmark inbound dashboard to use webhook from the deployment's domain instead of local dev domain
-
 # Tech Stack
-
-TODO: Add justification for these choices
 
 ## Infrastructure
 
@@ -96,11 +58,11 @@ TODO: Add justification for these choices
     * Cloud provider.
 - Docker
     * Containerization.
-- [ Pulumi ]()
+- [ Pulumi ](https://www.pulumi.com/)
     * This is an IaC solution that can be configured from a variety of programming languages through an SDK.
     * Provides the capacity to use a familiar programming language to configure the AWS services, this allows easy iteration and powerful contructs within the configuration.
     * Controls the provisioning of the AWS resources from scratch, including: VPC (Subnets & Security Groups), ECS, Fargate.
-- [ ECS ]()
+- [ ECS ](https://aws.amazon.com/ecs/)
     * AWS service to orchestrate containers.
     * The parent service to deploy Fargate instances.
     * Allows tight control over the network configuration through AWS VPC, such as:
@@ -112,14 +74,14 @@ TODO: Add justification for these choices
         + The Load Balancer, to route internet traffic to the Fargate instances.
         + In case of private subnets, it manages the NAT Gateway.
         + In case of public subnets, the public IPs (Elastic IPs) for outbound traffic.
-- [ Fargate ]()
+- [ Fargate ](https://aws.amazon.com/fargate/)
     * The compute managed by ECS, Fargate is the "managed" version. ECS can also run on self-managed EC2. Fargate abstracts away the maintanance of the EC2 instances.
     * Allow easy deployment of managed Docker containers.
     * For an app that needs to run 24/7, the price point is slightly higher than equivalent EC2 instances, but not by much.
-- [ Turso ]()
+- [ Turso ](https://turso.tech/)
     * This SaaS offers a remote managed SQLite database for a great price. Similar to using RDS, but simpler.
     * Works like a charm with the chosen backend framework chosen for the app, as both are limited to the SQLite database.
-- [ Postmark ]()
+- [ Postmark ](https://postmarkapp.com/)
     * This SaaS offers inbound and outbound email delivery through a JSON API, this significantly simplifies email integration in comparison to common email protocols.
 - Go programming language
     * The server app is written with Go.
@@ -139,21 +101,23 @@ Due to the usage of Turso SaaS for data, the data durability is incredibly high 
 ## Server app
 
 - Go libraries that power the app:
-    * [ Pocketbase ]()
+    * [ Pocketbase ](https://pocketbase.io/)
         + Framework to quickly iterate over the backend, managing many topics out of the box, such as:
             + Manages the database schema.
             + Manages a variety of operations on the database to consume the data.
             + Manages authentication for users and JWT tokens.
             + Manages authorization roles for each user, allowing them to access only their own data.
-    * [ Templ ]()
+    * [ Templ ](https://templ.guide/)
         + HTML templating for Go apps. Like JSX but for Go.
-    * [ SCS ](): Go session manager
-        + TODO: explain cookies auth here
+    * [ SCS ](https://github.com/alexedwards/scs): Go session manager
+        + Cookie-based session management for users navigating on their browser.
+        + Follows OWASP guidelines to keep cookies secure.
 - Frontend libraries:
-    * [ HTMX ]()
-        + TODO: 
-    * [ DaisyUi ]()
-        + TODO: 
+    * [ HTMX ](https://htmx.org/)
+        + This is a library to perform client-side DOM operations, without writing client-side JavaScript.
+        + This allows smooth transitions in the browser while keeping the logic in the server, such as displaying validation messages to the user.
+    * [ DaisyUi ](https://daisyui.com/)
+        + Great UI library to iterate quickly. Leverages TailwindCSS.
 
 # Feature set
 
@@ -170,11 +134,6 @@ Due to the usage of Turso SaaS for data, the data durability is incredibly high 
         + Efficient external tools where a hand-written solution provides little benefit.
         + Flexibility and freedom over smothering software dependencies.
 
-
-TODO:
-The features showcased include...
-I picked these because....
-
 # Limitations
 
 Due to simple parsing logic for inbound emails:
@@ -190,12 +149,16 @@ Due to simple parsing logic for inbound emails:
 
 With additional time, these limitations would be amended with ease.
 
-# Some learnings
+Due to time-constraints the user features are kept minimal. Although I would have enjoyed an "outbox" page to look at the sent emails, completing such an additional feature would simply require repeating the steps that were taken for the "inbox".
 
-## Things that went well 
+# Some learnings
 
 ## Things that I would have done differently a second time
 
 Using Pocketbase with a go-based ServerSideRendering for the UI is not ideal, as the Pocketbase API is focused on a JavaScript SDK, and misses some of its user functionality when using it as a server framework. For example:
-- there is no clear way to handle user auth from the Go code. 
-- Pocketbase has its own idiom to write additional routes, the Pocketbase idiom is not compatible with the Templ idiom to render pages. Luckily Pocketbase offers a helper function `apis.WrapStdHandler(handler)` to break out of its idiom and use the standard `http.net` idiom, which Templ leverages.
+- There is no clear way to handle user auth from the Go code, so I had to come up by trial and error with a proper way to manage the authentication middleware.
+
+Using Pocketbase with Templ is challenging, even though the libraries do their piece of the work really well, putting them together results in rather ugly routing code, as the http function handlers required by Templ have a different idiom/API than the function handlers used by Pocketbase.
+- One such example is the usage of `apis.WrapStdHandler(handler)` within the code, it makes the logic a bit more confusing than it has to be.
+
+In short, if I had to find a way to build another similar project, I would pick Pocketbase for the backend and an SPA framework for the frontend, as it would be much easier to work on.
