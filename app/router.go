@@ -115,7 +115,7 @@ func MakeRouter(app *pocketbase.PocketBase) {
 	// postmarkClient := postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 	postmark.NewClient(os.Getenv("POSTMARK_SERVER_TOKEN"), os.Getenv("POSTMARK_ACCOUNT_TOKEN"))
 
-	app.OnRecordAuthRequest().BindFunc(func(e *core.RecordAuthRequestEvent) error {
+	app.OnRecordAuthRequest("users").BindFunc(func(e *core.RecordAuthRequestEvent) error {
 		// println("OnRecordAuthRequest")
 		// to set cookie value
 		sessionManager.Put(e.Request.Context(), authCookieKey, e.Token)
@@ -134,14 +134,39 @@ func MakeRouter(app *pocketbase.PocketBase) {
 		// Email inbound from postmark
 		se.Router.POST("/api/postmark/inbound",
 			func(e *core.RequestEvent) error {
+				// fmt.Println("Postmark Webhook")
 				// postmarkClient
-				buf := new(strings.Builder)
-				_, err := io.Copy(buf, e.Request.Body)
+				// buf := new(strings.Builder)
+				// _, err := io.Copy(buf, e.Request.Body)
+				// if err != nil {
+				// 	return err
+				// }
+				// fmt.Println(buf.String())
+				collection, err := app.FindCollectionByNameOrId("inbound")
 				if err != nil {
 					return err
 				}
-				// check errors
-				fmt.Println(buf.String())
+
+				record := core.NewRecord(collection)
+
+				info, err := e.RequestInfo()
+				if err != nil {
+					return err
+				}
+				record.Set("deleted", false)
+				record.Set("subject", info.Body["Subject"].(string))
+				toFull := info.Body["ToFull"].([]interface{})
+				firstFrom := toFull[0].(map[string]interface{})
+				record.Set("to", firstFrom["Email"].(string))
+				record.Set("from", info.Body["From"].(string))
+				record.Set("body", info.Body["TextBody"].(string))
+				record.Set("raw", info.Body)
+
+				// validate and persist
+				err = app.Save(record)
+				if err != nil {
+					return err
+				}
 				return e.NoContent(http.StatusOK)
 			})
 

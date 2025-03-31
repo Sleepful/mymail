@@ -2,6 +2,7 @@
 
 First, create and env file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
 Use `make live` to run a server during development with `--watch` capability.
+You may need to run `npm i` and `go mod tidy` to download dependencies.
 
 Notes: 
 
@@ -39,6 +40,9 @@ a better configuration would use a local database for `dev`.
 To do so it would be necessary to add a CI/CD pipeline to handle 
 the migrations on the `prod` database.
 - Add CSRF protection to the forms, given that the project is using cookie-based authentication.
+- Add persistent logs:
+    * Currently the info and error logs are persisted to the filesystem, separate from the database provider to offset the load.
+    * On a `prod` environment, it would be important to persist the logs in a service like AWS CloudWatch.
 
 # Additional improvements for a long-term project
 
@@ -67,8 +71,8 @@ Sunday
 <!-- - test pulumi deployment of progress so far -->
 <!-- - start Postmark api integration once auth is working -->
 <!--     * https://postmarkapp.com/developer/integration/community-libraries#google-go -->
-- Store inbound emails in Pocketbase
-    * separate by user
+<!-- - Store inbound emails in Pocketbase -->
+<!--     * separate by user -->
 - Add UI to look at inbound emails
     * button to delete
     * only own user sees own emails
@@ -170,6 +174,20 @@ Due to the usage of Turso SaaS for data, the data durability is incredibly high 
 TODO:
 The features showcased include...
 I picked these because....
+
+# Limitations
+
+Due to simple parsing logic for inbound emails:
+- Only inbound emails with a single destination are taken into account.
+    * Corollary: Emails directed at multiple accounts might not show up in the inbox.
+- Only shows inbound emails with the exact email address, dots `.` and plus signs `+` are not supported.
+- Only the following fields are shown in the UI:
+    * Subject
+    * To
+    * From
+    * Body in plain text
+
+With additional time, these limitations would be amended with ease.
 
 # Some learnings
 
