@@ -48,7 +48,7 @@ the migrations on the `prod` database.
 
 - Moving away from Fargate and implementing a CI/CD pipeline.
     * Fargate is useful for its simplicity as there is no need to manage Linux resources as there would be with EC2 or Kubernetes.
-    * However, Fargate has a very slow deployment process, it may take up to 20 minutes to look at a live 
+    * However, Fargate has a very slow deployment process, it may take up to 20 minutes from start to finish.
 
 # Tech Stack
 
