@@ -3,6 +3,14 @@
 First, create and env file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
 Use `make live` to run a server during development with `--watch` capability.
 
+Notes: 
+
+- For Pulumi the only static ID is the SSL certificate from AWS, adjust this to your needs:
+    * in file `pulumi/src/ecs.ts` adjust constant `const CERT_ARN`
+
+- Besides `AWS`, a `postmarkapp.com` and a `turso.tech` account is necessary to fill the configuration.
+    * For `postmark`, you need to perform proper configuration of your domain on their dashboard, in order to use the inbound webhook.
+
 # Testing Dockerfile
 
 Use `make dockerbuild` and `make dockerrun` to test the Docker image locally.
@@ -57,8 +65,22 @@ Saturday
 
 Sunday
 <!-- - test pulumi deployment of progress so far -->
-- start Postmark api integration once auth is working
-    * https://postmarkapp.com/developer/integration/community-libraries#google-go
+<!-- - start Postmark api integration once auth is working -->
+<!--     * https://postmarkapp.com/developer/integration/community-libraries#google-go -->
+- Store inbound emails in Pocketbase
+    * separate by user
+- Add UI to look at inbound emails
+    * button to delete
+    * only own user sees own emails
+- Add UI to create new emails
+    * test UI submit emails, verify Postmark delivery succeeds
+    * only own user sees own emails
+    * Store outbound emails in Pocketbase
+    * add UI to look at outbound emails
+        + (same as before):
+            + button to delete
+            + only own user sees own emails
+- update Postmark inbound dashboard to use webhook from the deployment's domain instead of local dev domain
 
 # Tech Stack
 
@@ -134,6 +156,7 @@ Due to the usage of Turso SaaS for data, the data durability is incredibly high 
 ## Priorities when picking the feature-set of the solution
 
 - Full implementation across the tech stack, including proper configuration of the cloud resources.
+    * Including DNS and SSL configuration, which is not reflected in the code.
 - Proper user authentication.
 - Ease of use.
 - Meets the requirements of receiving and sending email with an intuitive user experience.
