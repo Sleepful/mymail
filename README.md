@@ -54,6 +54,8 @@ the migrations on the `prod` database.
 
 ## Infrastructure
 
+![diagram](./docs/kagi.demo.excalidraw.svg)
+
 - AWS 
     * Cloud provider.
 - Docker
