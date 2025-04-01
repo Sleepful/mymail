@@ -14,7 +14,11 @@ For the proper functioning of the app, it is necessary to do a few configuration
 - However, the app will be empty, in order to receive and send emails, it is required to configure the Email Service Provider. In this case, [ Postmark ](https://postmarkapp.com/).
 - In Postmark, you must configure the outbound email stream and the inbound email stream.
   + Outbound email stream: you need to simply copy your tokens into the env file, and you need to verify your address or domain as a sender in Postmark, this may require setting some DNS records. After you do this, you will be able to send emails from the app's UI through the account that you created earlier in the Pocketbase UI. Please note, your Verified Sender Email in Postmark must match the email of your app account that you created in the Pocketbase dashboard.
-  + Inbound email: you must register a webhook endpoint through which Postmark can reach your app in order to communicate inbound emails. This may require using a tunneling software if you don't have an HTTP endpoint accessible through the internet (`ngrok` is a simple one, `frp` is a OSS alternative with a higher learning curve).
+  + Inbound email: you must register a webhook endpoint through which Postmark can reach your app in order to communicate inbound emails. This may require using a tunneling software to expose your `localhost:8090/api/postmark/inbound` endpoint if you don't have an HTTP endpoint accessible through the internet ([`ngrok`]( https://ngrok.com/) is a simple one, [`frp`]( https://github.com/fatedier/frp ) is a OSS alternative with a higher learning curve).
+
+Congrats, if you did all that, you may now run the app locally with all of its functionality available.
+
+If you want to deploy to the cloud, you will require some additional knowledge to properly configure your virtual network. You may use the IaC in the `/pulumi` directory as reference.
 
 ### Notes: 
 
