@@ -10,7 +10,7 @@ For the proper functioning of the app, it is necessary to do a few configuration
 
 - You need to configure a [Turso](https://turso.tech/) account in order to allow database access to the app, respective env variables need to be set.
 - Once the app has access to a database, you need to run the app (`make gen` or `make live`), this will allow you access into a dashboard to the database, provided by the Pocketbase dependency. You can access this dashboard through `localhost:8090`. In here you will create an admin user, which has full access to the dashboard and the data. Then, you should go to the `users` collection in the dashboard and create the user accounts that will be accessed through the app. Take note of their email and password.
-- After you have taken this steps, you may now access through the login screen with said email address and password.
+- After you have taken these steps, you may now access through the login screen with said email address and password.
 - However, the app will be empty, in order to receive and send emails, it is required to configure the Email Service Provider. In this case, [ Postmark ](https://postmarkapp.com/).
 - In Postmark, you must configure the outbound email stream and the inbound email stream.
   + Outbound email stream: you need to simply copy your tokens into the env file, and you need to verify your address or domain as a sender in Postmark, this may require setting some DNS records. After you do this, you will be able to send emails from the app's UI through the account that you created earlier in the Pocketbase UI. Please note, your app account must match the verified sender in Pocketbase.
