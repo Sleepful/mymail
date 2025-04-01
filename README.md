@@ -1,10 +1,22 @@
 # Dev
 
-First, create and env file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
+First, create your secret `.env` file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
 Use `make live` to run a server during development with `--watch` capability.
 You may need to run `npm i` and `go mod tidy` to download dependencies.
 
-Notes: 
+## Requirements
+
+For the proper functioning of the app, it is necessary to do a few configuration steps with external services first. Namely:
+
+- You need to configure a [Turso](https://turso.tech/) account in order to allow database access to the app, respective env variables need to be set.
+- Once the app has access to a database, you need to run the app (`make gen` or `make live`), this will allow you access into a dashboard to the database, provided by the Pocketbase dependency. You can access this dashboard through `localhost:8090`. In here you will create an admin user, which has full access to the dashboard and the data. Then, you should go to the `users` collection in the dashboard and create the user accounts that will be accessed through the app. Take note of their email and password.
+- After you have taken this steps, you may now access through the login screen with said email address and password.
+- However, the app will be empty, in order to receive and send emails, it is required to configure the Email Service Provider. In this case, [ Postmark ](https://postmarkapp.com/).
+- In Postmark, you must configure the outbound email stream and the inbound email stream.
+  + Outbound email stream: you need to simply copy your tokens into the env file, and you need to verify your address or domain as a sender in Postmark, this may require setting some DNS records. After you do this, you will be able to send emails from the app's UI through the account that you created earlier in the Pocketbase UI. Please note, your app account must match the verified sender in Pocketbase.
+  + Inbound email: you must register a webhook endpoint through which Postmark can reach your app in order to communicate inbound emails. This may require using a tunneling software if you don't have an HTTP endpoint accessible through the internet (`ngrok` is a simple one, `frp` is a OSS alternative with a higher learning curve).
+
+### Notes: 
 
 - For Pulumi the only static ID is the SSL certificate from AWS, adjust this to your needs:
     * in file `pulumi/src/ecs.ts` adjust constant `const CERT_ARN`
