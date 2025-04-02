@@ -169,6 +169,8 @@ With additional time, these limitations would be amended with ease.
 
 Due to time-constraints the user features are kept minimal. Although I would have enjoyed an "outbox" page to look at the sent emails, completing such an additional feature would simply require repeating the steps that were taken for the "inbox".
 
+Something to keep in mind, and may be considered a limitation, is that the secrets are added to the Docker image that will be deployed. This is fine as long as the image remains completely private in the remote repository (ECR), but it is worth taking into account that this Docker image should not be shared without reworking the secrets mechanism (currenty an env file).
+
 # Some learnings
 
 ## Things that I would have done differently a second time
