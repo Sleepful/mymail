@@ -72,6 +72,8 @@ the migrations on the `prod` database.
 
 ![diagram](./docs/kagi.demo.excalidraw.svg)
 
+> Some networking components have been elided from the diagram for simplicity, such as the VPC with its Internet Gateway to access the internet, a load balancer to route incoming tranffic into the Fargate instance, and an Elastic IP for the Fargate instance that allows outbound connections which originate from the instance.
+
 - AWS 
     * Cloud provider.
 - Docker
