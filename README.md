@@ -1,3 +1,9 @@
+# About this repo
+
+The story about this repo has been shared in my blog, here: https://bloggeroo.dev/articles/202504031434
+
+This repo represents a web application which sends and receives emails, with basic user/password authentication. Includes the IaC (Infrastructure as Code) files to deploy on AWS ECS Fargate. 
+
 # Dev
 
 First, create your secret `.env` file: `cp env.example .env`, open the file and add the relevant secrets to your env file.
